@@ -32,7 +32,8 @@ webforj-tutorial
 ├───2-working-with-data
 ├───3-routing-and-composites
 ├───4-observers-and-route-parameters
-└───5-validating-and-binding-data  
+├───5-validating-and-binding-data  
+└───6-integrating-an-app-layout 
 ```
 
 ## Running the App (Spring Boot)
