@@ -1,0 +1,10 @@
+.card {
+  display: grid;
+  gap: var(--dwc-space-l);
+  padding: var(--dwc-space-l);
+  margin: var(--dwc-space-l) auto;
+  border: thin solid var(--dwc-color-default);
+  border-radius: 16px;
+  background-color: var(--dwc-surface-3);
+  box-shadow: var(--dwc-shadow-xs);
+}
