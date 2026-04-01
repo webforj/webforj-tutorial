@@ -14,7 +14,7 @@ import com.webforj.component.layout.applayout.AppLayout;
 import com.webforj.component.layout.appnav.AppNav;
 import com.webforj.component.layout.appnav.AppNavItem;
 import com.webforj.component.layout.toolbar.Toolbar;
-import com.webforj.tutorial.components.DrawerHeader;
+import com.webforj.tutorial.components.AppTitle;
 import com.webforj.tutorial.views.AboutView;
 import com.webforj.tutorial.views.MainView;
 import com.webforj.dispatcher.ListenerRegistration;
@@ -34,15 +34,16 @@ public class MainLayout extends Composite<AppLayout> {
   }
 
   private void setHeader() {
-    self.setDrawerHeaderVisible(true)
-        .addToDrawerTitle(new DrawerHeader())
-        .addToHeader(toolbar);
+    self.addToHeader(toolbar);
 
     toolbar.addToStart(new AppDrawerToggle());
     toolbar.addToTitle(title);
   }
 
   private void setDrawer() {
+    self.setDrawerHeaderVisible(true)
+        .addToDrawerTitle(new AppTitle(true));
+
     appNav.addItem(new AppNavItem("Dashboard", MainView.class,
         TablerIcon.create("archive")));
     appNav.addItem(new AppNavItem("About", AboutView.class,
