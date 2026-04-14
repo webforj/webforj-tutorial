@@ -35,12 +35,7 @@ public class MainView extends Composite<FlexLayout> {
   }
 
   private void buildTable() {
-    double headerHeight = table.getHeaderHeight();
-    double rowHeight = table.getRowHeight();
-    double tableHeight = rowHeight * customerService.getTotalCustomersCount() + headerHeight;
-    table.setWidth("100%");
-    table.setHeight((float) tableHeight);
-    table.setMaxHeight("100%");
+    table.setSize("100%", "294px");
     table.addColumn("firstName", Customer::getFirstName).setLabel("First Name");
     table.addColumn("lastName", Customer::getLastName).setLabel("Last Name");
     table.addColumn("company", Customer::getCompany).setLabel("Company");
