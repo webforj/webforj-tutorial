@@ -91,23 +91,6 @@
   <build>
     <defaultGoal>spring-boot:run</defaultGoal>
     <plugins>
-    <plugin>
-        <groupId>org.openrewrite.maven</groupId>
-        <artifactId>rewrite-maven-plugin</artifactId>
-        <version>6.36.0</version>
-        <configuration>
-          <activeRecipes>
-            <recipe>com.webforj.rewrite.v26.UpgradeWebforjSpring</recipe>
-          </activeRecipes>
-        </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>com.webforj</groupId>
-            <artifactId>webforj-rewrite</artifactId>
-            <version>26.00-SNAPSHOT</version>
-          </dependency>
-        </dependencies>
-      </plugin>
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>

@@ -91,23 +91,6 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.openrewrite.maven</groupId>
-        <artifactId>rewrite-maven-plugin</artifactId>
-        <version>6.36.0</version>
-        <configuration>
-          <activeRecipes>
-            <recipe>com.webforj.rewrite.v26.UpgradeWebforjSpring</recipe>
-          </activeRecipes>
-        </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>com.webforj</groupId>
-            <artifactId>webforj-rewrite</artifactId>
-            <version>26.00-SNAPSHOT</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-      <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>3.5.5</version>
         <executions>
