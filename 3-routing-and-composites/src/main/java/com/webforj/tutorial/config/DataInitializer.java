@@ -1,7 +1,8 @@
 package com.webforj.tutorial.config;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.webforj.tutorial.entity.Customer;
 import com.webforj.tutorial.service.CustomerService;
 import org.springframework.boot.CommandLineRunner;
@@ -26,7 +27,7 @@ public class DataInitializer implements CommandLineRunner {
   }
 
   private void loadCustomersFromJson() {
-    ObjectMapper mapper = new ObjectMapper();
+    ObjectMapper mapper = new JsonMapper();
     try (InputStream is = getClass().getResourceAsStream("/data/customers.json")) {
       List<Customer> customers = mapper.readValue(is, new TypeReference<List<Customer>>() {
       });
