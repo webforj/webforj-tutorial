@@ -5,11 +5,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import com.webforj.App;
 import com.webforj.annotation.AppProfile;
 import com.webforj.annotation.AppTheme;
-import com.webforj.annotation.StyleSheet;
 import com.webforj.annotation.Routify;
+import com.webforj.bundle.annotation.BundleEntry;
 
 @SpringBootApplication
-@StyleSheet("ws://css/card.css")
+@BundleEntry("css/card.css")
 @AppTheme("system")
 @Routify(packages = "com.webforj.tutorial.views")
 @AppProfile(name = "Customer Application", shortName = "CustomerApp")
