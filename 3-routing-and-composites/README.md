@@ -11,7 +11,8 @@ For a complete step-by-step guide to building this app, see the **[webforJ Tutor
 
 To run the app, ensure the following tools are installed:
 
-- Java 17 or higher
+- Java 21 or higher
+- BBj 26.01 when running with local BBjServices
 - Maven
 - A Java IDE (e.g., IntelliJ IDEA, Eclipse, VSCode)
 - Web browser
