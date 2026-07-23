@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import com.webforj.App;
 import com.webforj.annotation.AppProfile;
 import com.webforj.annotation.AppTheme;
-import com.webforj.annotation.StyleSheet;
+import com.webforj.bundle.annotation.BundleEntry;
 import com.webforj.component.button.Button;
 import com.webforj.component.button.ButtonTheme;
 import com.webforj.component.html.elements.Paragraph;
@@ -17,7 +17,7 @@ import com.webforj.component.optiondialog.OptionDialog;
 import com.webforj.component.table.Table;
 
 @SpringBootApplication
-@StyleSheet("ws://css/card.css")
+@BundleEntry("css/card.css")
 @AppTheme("system")
 @AppProfile(name = "Customer Application", shortName = "CustomerApp")
 public class Application extends App {
