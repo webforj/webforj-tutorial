@@ -14,6 +14,7 @@ To run the app, ensure the following tools are installed:
 - Java 21 or higher
 - BBj 26.02 when running with local BBjServices
 - Maven
+- Node.js 20 or higher for end-to-end tests
 - A Java IDE (e.g., IntelliJ IDEA, Eclipse, VSCode)
 - Web browser
 - Git (recommended)
@@ -48,6 +49,38 @@ webforj-tutorial
 	mvn
 	```
 3. Open your browser and go to [http://localhost:8080](http://localhost:8080).
+
+## End-to-End and Screenshot Tests
+
+The root Playwright suite builds and starts each tutorial step separately, runs it against a fresh in-memory database, and stops it after testing. It uses port 8080 when available, falls back to 8090, and otherwise selects a free local port.
+
+Install the test dependencies and Chromium once:
+
+```sh
+npm ci
+npm run e2e:install
+```
+
+Run all six tutorial steps:
+
+```sh
+npm run e2e
+```
+
+Run or debug an individual step:
+
+```sh
+npm run e2e -- 3
+npm run e2e:headed -- 3
+```
+
+Update committed screenshot baselines after an intentional visual change:
+
+```sh
+npm run e2e:update -- 3
+```
+
+Use `--skip-build` while iterating when the packaged application is already current. HTML reports are written under `playwright-report/step-N`, and failure screenshots, videos, traces, and application logs are written under `test-results/step-N`.
 
 ## Project Highlights
 

@@ -58,12 +58,6 @@
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.microsoft.playwright</groupId>
-      <artifactId>playwright</artifactId>
-      <version>1.49.0</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
   <build>
     <defaultGoal>compile webforj:watch spring-boot:run</defaultGoal>
@@ -84,20 +78,6 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
           <excludeDevtools>true</excludeDevtools>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <trimStackTrace>false</trimStackTrace>
         </configuration>
       </plugin>
     </plugins>
