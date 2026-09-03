@@ -14,7 +14,7 @@ To run the app, ensure the following tools are installed:
 - Java 21 or higher
 - BBj 26.02 when running with local BBjServices
 - Maven
-- Node.js 20 or higher for end-to-end tests
+- Docker Desktop (or another Docker engine) for end-to-end tests
 - A Java IDE (e.g., IntelliJ IDEA, Eclipse, VSCode)
 - Web browser
 - Git (recommended)
@@ -52,35 +52,36 @@ webforj-tutorial
 
 ## End-to-End and Screenshot Tests
 
-The root Playwright suite builds and starts each tutorial step separately, runs it against a fresh in-memory database, and stops it after testing. It uses port 8080 when available, falls back to 8090, and otherwise selects a free local port.
+The root Maven project runs the Java Playwright suite exclusively in Docker. The container packages and starts each tutorial step separately, uses Chromium from the pinned official Playwright Java image, and stops the application after that step's tests. Applications prefer port 8080, fall back to 8090, and otherwise select a free container port.
 
-Install the test dependencies and Chromium once:
-
-```sh
-npm ci
-npm run e2e:install
-```
-
-Run all six tutorial steps:
+Run all six tutorial steps, including screenshot comparisons:
 
 ```sh
-npm run e2e
+mvn verify
 ```
 
-Run or debug an individual step:
+Run an individual step in Docker:
 
 ```sh
-npm run e2e -- 3
-npm run e2e:headed -- 3
+mvn verify -Dit.test=Step3IT
 ```
 
-Update committed screenshot baselines after an intentional visual change:
+After an intentional visual change, regenerate every committed baseline in the same Docker environment:
 
 ```sh
-npm run e2e:update -- 3
+mvn verify -DupdateScreenshots=true
 ```
 
-Use `--skip-build` while iterating when the packaged application is already current. HTML reports are written under `playwright-report/step-N`, and failure screenshots, videos, traces, and application logs are written under `test-results/step-N`.
+You can also use the documentation-style explicit Docker goals. Build the image once, then run or update tests with the existing image:
+
+```sh
+mvn exec:exec@docker-e2e-build
+mvn exec:exec@docker-e2e
+mvn exec:exec@docker-e2e-single -Dtest=Step3IT
+mvn exec:exec@docker-e2e-update
+```
+
+Screenshot baselines are stored in `e2e/src/test/resources/screenshots`. The comparator allows up to 500 anti-aliased pixels to differ in each 1440×900 capture; failure images are written to `target/visual-diffs`, Playwright traces to `target/playwright-traces`, and application logs to `target/e2e-artifacts`. The inner test profile also rejects execution unless `E2E_IN_DOCKER=true`, preventing accidental host-generated baselines.
 
 ## Project Highlights
 
