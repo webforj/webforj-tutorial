@@ -27,7 +27,7 @@ public class Application extends App {
   public void run() throws WebforjException {
     Frame mainFrame = new Frame();
     Paragraph tutorial = new Paragraph("Tutorial App!");
-    Button btn = new Button("Info");
+    Button btn = new Button("hotswap an");
 
     btn
       .setTheme(ButtonTheme.PRIMARY)
