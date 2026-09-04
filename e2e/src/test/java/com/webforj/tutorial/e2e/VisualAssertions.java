@@ -54,11 +54,12 @@ final class VisualAssertions {
     Path baselineDirectory = Path.of(requiredProperty("visual.baseline.dir"));
     Path artifactDirectory = Path.of(requiredProperty("visual.artifact.dir"));
     Path baseline = baselineDirectory.resolve(name);
+    byte[] screenshot = captureStable(page, name, artifactDirectory);
 
     if (Boolean.getBoolean("updateScreenshots")) {
       requireDocker();
       Files.createDirectories(baselineDirectory);
-      Files.write(baseline, captureStable(page));
+      Files.write(baseline, screenshot);
       return;
     }
 
@@ -72,45 +73,27 @@ final class VisualAssertions {
       fail("Could not decode screenshot baseline for " + name);
     }
 
-    // Icons are fetched over the network and components paint asynchronously, so a single capture
-    // can catch a half-rendered page. Re-capture until the page matches the baseline or the
-    // deadline expires, and report the last mismatch.
-    int maximum = Integer.getInteger("visual.maxDiffPixels", DEFAULT_MAX_DIFFERENT_PIXELS);
-    long deadline = System.currentTimeMillis() + timeoutMs();
-    byte[] screenshot;
-    BufferedImage actual;
-    int differentPixels;
-    BufferedImage diff;
-
-    while (true) {
-      screenshot = capture(page);
-      actual = ImageIO.read(new ByteArrayInputStream(screenshot));
-      if (actual == null) {
-        fail("Could not decode captured screenshot for " + name);
-      }
-
-      if (expected.getWidth() != actual.getWidth() || expected.getHeight() != actual.getHeight()) {
-        writeFailureArtifacts(artifactDirectory, name, screenshot, null);
-        fail("Screenshot dimensions differ for " + name + ": expected "
-            + expected.getWidth() + "x" + expected.getHeight() + ", actual "
-            + actual.getWidth() + "x" + actual.getHeight());
-      }
-
-      diff = new BufferedImage(actual.getWidth(), actual.getHeight(), BufferedImage.TYPE_INT_ARGB);
-      differentPixels = comparePixels(expected, actual, diff);
-      if (differentPixels <= maximum) {
-        return;
-      }
-      if (System.currentTimeMillis() >= deadline) {
-        break;
-      }
-      page.waitForTimeout(POLL_INTERVAL_MS);
+    BufferedImage actual = ImageIO.read(new ByteArrayInputStream(screenshot));
+    if (actual == null) {
+      fail("Could not decode captured screenshot for " + name);
     }
 
-    writeFailureArtifacts(artifactDirectory, name, screenshot, diff);
-    fail("Screenshot mismatch for " + name + ": " + differentPixels
-        + " pixels differ (maximum " + maximum + ") after " + timeoutMs()
-        + " ms of retries. See " + artifactDirectory);
+    if (expected.getWidth() != actual.getWidth() || expected.getHeight() != actual.getHeight()) {
+      writeFailureArtifacts(artifactDirectory, name, screenshot, null);
+      fail("Screenshot dimensions differ for " + name + ": expected "
+          + expected.getWidth() + "x" + expected.getHeight() + ", actual "
+          + actual.getWidth() + "x" + actual.getHeight());
+    }
+
+    BufferedImage diff = new BufferedImage(
+        actual.getWidth(), actual.getHeight(), BufferedImage.TYPE_INT_ARGB);
+    int differentPixels = comparePixels(expected, actual, diff);
+    int maximum = Integer.getInteger("visual.maxDiffPixels", DEFAULT_MAX_DIFFERENT_PIXELS);
+    if (differentPixels > maximum) {
+      writeFailureArtifacts(artifactDirectory, name, screenshot, diff);
+      fail("Screenshot mismatch for " + name + ": " + differentPixels
+          + " pixels differ (maximum " + maximum + "). See " + artifactDirectory);
+    }
   }
 
   private static void awaitRenderedIcons(Page page) {
@@ -132,14 +115,11 @@ final class VisualAssertions {
         .setScale(ScreenshotScale.CSS));
   }
 
-  /**
-   * Captures once the page stops changing, so regenerated baselines never record a transient
-   * render. Falls back to the last capture if the page never settles.
-   */
-  private static byte[] captureStable(Page page) {
-    long deadline = System.currentTimeMillis() + timeoutMs();
+  private static byte[] captureStable(
+      Page page, String name, Path artifactDirectory) throws IOException {
+    long deadline = System.nanoTime() + timeoutMs() * 1_000_000L;
     byte[] previous = capture(page);
-    while (System.currentTimeMillis() < deadline) {
+    while (System.nanoTime() < deadline) {
       page.waitForTimeout(POLL_INTERVAL_MS);
       byte[] current = capture(page);
       if (Arrays.equals(previous, current)) {
@@ -147,7 +127,11 @@ final class VisualAssertions {
       }
       previous = current;
     }
-    return previous;
+
+    writeFailureArtifacts(artifactDirectory, name, previous, null);
+    return fail("Page did not produce two consecutive identical screenshots for " + name
+        + " within " + timeoutMs() + " ms. Refusing to compare or update an unstable image. See "
+        + artifactDirectory);
   }
 
   private static int comparePixels(BufferedImage expected, BufferedImage actual, BufferedImage diff) {
