@@ -1,8 +1,6 @@
 package com.webforj.tutorial.e2e;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
@@ -48,38 +46,26 @@ class Step6IT extends BaseTest {
   void keepsApplicationLayoutUsableAtNarrowViewport() throws IOException {
     page.setViewportSize(390, 844);
     openApplication();
+    expectCustomerTable();
 
     assertThat(page.getByRole(AriaRole.HEADING,
         new Page.GetByRoleOptions().setName("Customer Table").setLevel(1))).isVisible();
     assertThat(page.getByRole(AriaRole.BUTTON,
         new Page.GetByRoleOptions().setName("Add Customer"))).isVisible();
-    VisualAssertions.assertScreenshot(page, "dashboard-mobile.png");
 
     Locator dashboardLink = page.getByRole(AriaRole.LINK,
         new Page.GetByRoleOptions().setName(Pattern.compile("Dashboard")));
-    waitForViewportState(dashboardLink, false);
-    assertFalse(isInViewport(dashboardLink), "Dashboard link should start outside the mobile viewport");
+    assertThat(dashboardLink).not().isInViewport();
+    waitForLayoutToSettle();
+    VisualAssertions.assertScreenshot(page, "dashboard-mobile.png");
+
     page.getByRole(AriaRole.BUTTON,
         new Page.GetByRoleOptions().setName(Pattern.compile("menu", Pattern.CASE_INSENSITIVE))).click();
-    waitForViewportState(dashboardLink, true);
-    assertTrue(isInViewport(dashboardLink), "Dashboard link should enter the viewport when the drawer opens");
+    assertThat(dashboardLink).isInViewport();
   }
 
-  private void waitForViewportState(Locator locator, boolean expected) {
-    long deadline = System.nanoTime() + 10_000_000_000L;
-    while (System.nanoTime() < deadline) {
-      if (isInViewport(locator) == expected) {
-        return;
-      }
-      page.waitForTimeout(100);
-    }
-  }
-
-  private boolean isInViewport(Locator locator) {
-    return Boolean.TRUE.equals(locator.evaluate("element => {"
-        + "const rect = element.getBoundingClientRect();"
-        + "return rect.bottom > 0 && rect.right > 0 "
-        + "&& rect.top < window.innerHeight && rect.left < window.innerWidth;"
-        + "}"));
+  private void waitForLayoutToSettle() {
+    page.evaluate("() => new Promise(resolve => requestAnimationFrame(() => "
+        + "requestAnimationFrame(() => resolve())))");
   }
 }

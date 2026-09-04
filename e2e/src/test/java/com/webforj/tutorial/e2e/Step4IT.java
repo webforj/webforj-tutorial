@@ -6,12 +6,8 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
 import java.io.IOException;
 import java.util.regex.Pattern;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 
-@TestMethodOrder(OrderAnnotation.class)
 class Step4IT extends BaseTest {
   @Override
   protected String stepDirectory() {
@@ -19,7 +15,6 @@ class Step4IT extends BaseTest {
   }
 
   @Test
-  @Order(1)
   void showsRoutedCustomerFormConsistently() throws IOException {
     openApplication("/customer/1");
     assertThat(page.getByLabel("First Name")).hasValue("Alice");
@@ -29,26 +24,23 @@ class Step4IT extends BaseTest {
   }
 
   @Test
-  @Order(2)
   void loadsCustomerFromRouteAndSavesEdits() {
     openApplication();
     expectCustomerTable();
 
-    page.getByText("Alice", new Page.GetByTextOptions().setExact(true)).click();
-    assertThat(page).hasURL(Pattern.compile("/customer/1$"));
-    assertThat(page.getByLabel("First Name")).hasValue("Alice");
-    assertThat(page.getByLabel("Last Name")).hasValue("Smith");
+    page.getByText("John", new Page.GetByTextOptions().setExact(true)).click();
+    assertThat(page).hasURL(Pattern.compile("/customer/2$"));
+    assertThat(page.getByLabel("First Name")).hasValue("John");
+    assertThat(page.getByLabel("Last Name")).hasValue("Doe");
 
     var company = page.getByLabel("Company");
     company.click();
     company.press("Control+A");
-    company.pressSequentially("Updated TechCorp", new com.microsoft.playwright.Locator.PressSequentiallyOptions()
-        .setDelay(25));
-    assertThat(company).hasValue("Updated TechCorp");
+    company.pressSequentially("Updated Innovatech");
+    assertThat(company).hasValue("Updated Innovatech");
     page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Submit")).click();
     assertThat(page).hasURL(Pattern.compile("/$"));
-    assertThat(page.getByRole(AriaRole.CELL,
-        new Page.GetByRoleOptions().setName("Updated TechCorp").setExact(true))).isVisible();
+    assertThat(expectCustomerRow("John")).containsText("Updated Innovatech");
 
     openApplication("/customer/999999");
     assertThat(page).hasURL(Pattern.compile("/$"));

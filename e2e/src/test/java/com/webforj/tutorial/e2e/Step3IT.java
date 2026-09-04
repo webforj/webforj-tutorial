@@ -2,6 +2,8 @@ package com.webforj.tutorial.e2e;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
+import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
 import java.io.IOException;
 import java.util.regex.Pattern;
@@ -18,13 +20,13 @@ class Step3IT extends BaseTest {
     openApplication();
     expectCustomerTable();
 
-    page.getByRole(AriaRole.BUTTON, new com.microsoft.playwright.Page.GetByRoleOptions()
+    page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions()
         .setName("Add Customer")).click();
     assertThat(page).hasURL(Pattern.compile("/customer$"));
     assertThat(page.getByRole(AriaRole.BUTTON,
-        new com.microsoft.playwright.Page.GetByRoleOptions().setName("Submit"))).isVisible();
+        new Page.GetByRoleOptions().setName("Submit"))).isVisible();
     assertThat(page.getByRole(AriaRole.BUTTON,
-        new com.microsoft.playwright.Page.GetByRoleOptions().setName("Cancel"))).isVisible();
+        new Page.GetByRoleOptions().setName("Cancel"))).isVisible();
 
     page.getByLabel("First Name").fill("Ada");
     page.getByLabel("Last Name").fill("Lovelace");
@@ -32,15 +34,15 @@ class Step3IT extends BaseTest {
     VisualAssertions.assertScreenshot(page, "completed-customer-form.png");
 
     page.getByRole(AriaRole.BUTTON,
-        new com.microsoft.playwright.Page.GetByRoleOptions().setName("Submit")).click();
+        new Page.GetByRoleOptions().setName("Submit")).click();
     assertThat(page).hasURL(Pattern.compile("/$"));
-    assertThat(customerTable()).containsText("Ada");
-    assertThat(customerTable()).containsText("Analytical Engines");
+    Locator adaRow = expectCustomerRow("Ada");
+    assertThat(adaRow).containsText("Analytical Engines");
 
     page.getByRole(AriaRole.BUTTON,
-        new com.microsoft.playwright.Page.GetByRoleOptions().setName("Add Customer")).click();
+        new Page.GetByRoleOptions().setName("Add Customer")).click();
     page.getByRole(AriaRole.BUTTON,
-        new com.microsoft.playwright.Page.GetByRoleOptions().setName("Cancel")).click();
+        new Page.GetByRoleOptions().setName("Cancel")).click();
     assertThat(page).hasURL(Pattern.compile("/$"));
   }
 }

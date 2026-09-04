@@ -37,8 +37,7 @@ class Step5IT extends BaseTest {
 
     submit.click();
     assertThat(page).hasURL(Pattern.compile("/$"));
-    assertThat(customerTable()).containsText("Grace");
-    assertThat(customerTable()).containsText("Compiler Systems");
+    assertThat(expectCustomerRow("Grace")).containsText("Compiler Systems");
   }
 
   @Test

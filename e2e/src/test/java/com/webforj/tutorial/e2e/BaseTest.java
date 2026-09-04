@@ -13,6 +13,7 @@ import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.Request;
 import com.microsoft.playwright.Tracing;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
+import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.ColorScheme;
 import com.microsoft.playwright.options.WaitUntilState;
 import java.io.IOException;
@@ -40,16 +41,16 @@ abstract class BaseTest {
   protected abstract String stepDirectory();
 
   @BeforeAll
-  void startApplicationAndBrowser() throws Exception {
-    application = TutorialApp.start(stepDirectory());
+  void startBrowser() {
     playwright = Playwright.create();
     browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
     PlaywrightAssertions.setDefaultAssertionTimeout(10_000);
   }
 
   @BeforeEach
-  void createBrowserContext() {
+  void startApplicationAndCreateBrowserContext() throws Exception {
     browserErrors.clear();
+    application = TutorialApp.start(stepDirectory());
     context = browser.newContext(new Browser.NewContextOptions()
         .setViewportSize(1440, 900)
         .setDeviceScaleFactor(1)
@@ -71,30 +72,34 @@ abstract class BaseTest {
   @AfterEach
   void closeBrowserContext(TestInfo testInfo) throws IOException {
     List<String> errorsBeforeClose = List.copyOf(browserErrors);
-    if (context != null) {
-      Path traceDirectory = Path.of("target", "playwright-traces");
-      Files.createDirectories(traceDirectory);
-      String testName = (getClass().getSimpleName() + "-" + testInfo.getDisplayName())
-          .replaceAll("[^a-zA-Z0-9.-]", "-");
-      context.tracing().stop(new Tracing.StopOptions()
-          .setPath(traceDirectory.resolve(testName + ".zip")));
-      context.close();
-      context = null;
+    try {
+      if (context != null) {
+        Path traceDirectory = Path.of("target", "playwright-traces");
+        Files.createDirectories(traceDirectory);
+        String testName = (getClass().getSimpleName() + "-" + testInfo.getDisplayName())
+            .replaceAll("[^a-zA-Z0-9.-]", "-");
+        context.tracing().stop(new Tracing.StopOptions()
+            .setPath(traceDirectory.resolve(testName + ".zip")));
+        context.close();
+        context = null;
+      }
+    } finally {
+      if (application != null) {
+        application.close();
+        application = null;
+      }
     }
     assertTrue(errorsBeforeClose.isEmpty(),
         () -> "Browser runtime/network errors:\n" + String.join("\n", errorsBeforeClose));
   }
 
   @AfterAll
-  void stopApplicationAndBrowser() {
+  void stopBrowser() {
     if (browser != null) {
       browser.close();
     }
     if (playwright != null) {
       playwright.close();
-    }
-    if (application != null) {
-      application.close();
     }
   }
 
@@ -122,6 +127,15 @@ abstract class BaseTest {
     assertThat(table).containsText("Alice");
     assertThat(table).containsText("TechCorp");
     return table;
+  }
+
+  protected Locator expectCustomerRow(String identifyingCellText) {
+    Locator identifyingCell = page.getByRole(AriaRole.CELL,
+        new Page.GetByRoleOptions().setName(identifyingCellText).setExact(true));
+    Locator row = page.getByRole(AriaRole.ROW)
+        .filter(new Locator.FilterOptions().setHas(identifyingCell));
+    assertThat(row).hasCount(1);
+    return row;
   }
 
   private void recordConsoleError(ConsoleMessage message) {
