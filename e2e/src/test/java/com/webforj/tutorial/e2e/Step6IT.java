@@ -56,16 +56,10 @@ class Step6IT extends BaseTest {
     Locator dashboardLink = page.getByRole(AriaRole.LINK,
         new Page.GetByRoleOptions().setName(Pattern.compile("Dashboard")));
     assertThat(dashboardLink).not().isInViewport();
-    waitForLayoutToSettle();
     VisualAssertions.assertScreenshot(page, "dashboard-mobile.png");
 
     page.getByRole(AriaRole.BUTTON,
         new Page.GetByRoleOptions().setName(Pattern.compile("menu", Pattern.CASE_INSENSITIVE))).click();
     assertThat(dashboardLink).isInViewport();
-  }
-
-  private void waitForLayoutToSettle() {
-    page.evaluate("() => new Promise(resolve => requestAnimationFrame(() => "
-        + "requestAnimationFrame(() => resolve())))");
   }
 }
