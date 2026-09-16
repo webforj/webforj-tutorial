@@ -18,15 +18,13 @@ import com.webforj.tutorial.service.CustomerService;
 import com.webforj.router.Router;
 import com.webforj.router.annotation.FrameTitle;
 import com.webforj.router.annotation.Route;
-import com.webforj.router.event.DidEnterEvent;
 import com.webforj.router.event.WillEnterEvent;
 import com.webforj.router.history.ParametersBag;
-import com.webforj.router.observer.DidEnterObserver;
 import com.webforj.router.observer.WillEnterObserver;
 
 @Route("customer/:id?<[0-9]+>")
 @FrameTitle("Customer Form")
-public class FormView extends Composite<Div> implements WillEnterObserver, DidEnterObserver {
+public class FormView extends Composite<Div> implements WillEnterObserver {
   private final CustomerService customerService;
   private Customer customer = new Customer();
   private Long customerId = 0L;
@@ -89,17 +87,13 @@ public class FormView extends Composite<Div> implements WillEnterObserver, DidEn
       customerId = Long.valueOf(id);
       if (customerService.doesCustomerExist(customerId)) {
         event.accept();
+        fillForm(customerId);
       } else {
         event.reject();
         navigateToMain();
       }
 
     }, () -> event.accept());
-  }
-
-  @Override
-  public void onDidEnter(DidEnterEvent event, ParametersBag parameters) {
-    parameters.getInt("id").ifPresent(id -> fillForm(Long.valueOf(id)));
   }
 
   public void fillForm(Long customerId) {
