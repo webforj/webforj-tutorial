@@ -9,7 +9,7 @@
     <relativePath/>
   </parent>
   <groupId>com.webforj.tutorial</groupId>
-  <artifactId>customer-app</artifactId>
+  <artifactId>customer-app-step-3</artifactId>
   <version>1.0-SNAPSHOT</version>
   <name>CustomerApplication</name>
   <properties>
