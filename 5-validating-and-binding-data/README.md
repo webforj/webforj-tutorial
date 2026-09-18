@@ -14,6 +14,7 @@ To run the app, ensure the following tools are installed:
 - Java 21 or higher
 - BBj 26.02 when running with local BBjServices
 - Maven
+- Docker Desktop (or another Docker engine) for end-to-end tests
 - A Java IDE (e.g., IntelliJ IDEA, Eclipse, VSCode)
 - Web browser
 - Git (recommended)
@@ -48,6 +49,24 @@ webforj-tutorial
 	mvn
 	```
 3. Open your browser and go to [http://localhost:8080](http://localhost:8080).
+
+## End-to-End and Screenshot Tests
+
+With Docker running, execute this command from this step's directory:
+
+```sh
+mvn verify
+```
+
+Maven launches the step's Java Playwright tests in the pinned Docker image. Only this step is built and tested. Tests are in `src/test/java/com/webforj/tutorial`, screenshot baselines in `src/test/resources/screenshots`, and reports, traces, and logs under `target`.
+
+To update this step's baselines after an intentional visual change:
+
+```sh
+mvn verify -DupdateScreenshots=true
+```
+
+Both test execution and baseline generation happen in Docker. `mvn test` runs unit tests; the end-to-end tests run during `mvn verify`.
 
 ## Project Highlights
 

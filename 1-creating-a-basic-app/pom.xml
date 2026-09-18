@@ -18,6 +18,13 @@
     <maven.compiler.target>21</maven.compiler.target>
     <maven.compiler.source>21</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <playwright.version>1.50.0</playwright.version>
+    <junit-jupiter.version>5.11.4</junit-jupiter.version>
+    <it.test>*IT</it.test>
+    <updateScreenshots>false</updateScreenshots>
+    <maven.test.skip>false</maven.test.skip>
+    <skipTests>${maven.test.skip}</skipTests>
+    <skipITs>${skipTests}</skipITs>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -53,7 +60,12 @@
     <dependency>
       <groupId>com.microsoft.playwright</groupId>
       <artifactId>playwright</artifactId>
-      <version>1.49.0</version>
+      <version>${playwright.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -75,21 +87,9 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
-          <excludeDevtools>true</excludeDevtools>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <trimStackTrace>false</trimStackTrace>
+          <hotswap>
+            <hotswapAgent />
+          </hotswap>
         </configuration>
       </plugin>
     </plugins>
@@ -104,6 +104,100 @@
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
+    </profile>
+    <!-- mvn verify in this step delegates browser tests to the pinned Docker image. -->
+    <profile>
+      <id>docker-e2e</id>
+      <activation>
+        <property>
+          <name>!docker.e2e.container</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+              <execution>
+                <id>docker-e2e</id>
+                <phase>verify</phase>
+                <goals><goal>exec</goal></goals>
+                <configuration>
+                  <skip>${skipITs}</skip>
+                  <executable>docker</executable>
+                  <arguments>
+                    <argument>run</argument>
+                    <argument>--rm</argument>
+                    <argument>--init</argument>
+                    <argument>--ipc=host</argument>
+                    <argument>--workdir=/app</argument>
+                    <argument>-e</argument>
+                    <argument>CI=true</argument>
+                    <argument>-e</argument>
+                    <argument>E2E_IN_DOCKER=true</argument>
+                    <argument>--mount=type=bind,source=${project.basedir},target=/app</argument>
+                    <argument>-v</argument>
+                    <argument>webforj-tutorial-e2e-maven-repo:/var/maven/.m2</argument>
+                    <argument>-e</argument>
+                    <argument>MAVEN_CONFIG=/var/maven/.m2</argument>
+                    <argument>mcr.microsoft.com/playwright/java:v${playwright.version}-noble</argument>
+                    <argument>mvn</argument>
+                    <argument>-B</argument>
+                    <argument>-ntp</argument>
+                    <argument>-Dmaven.repo.local=/var/maven/.m2/repository</argument>
+                    <argument>-Ddocker.e2e.container=true</argument>
+                    <argument>-DupdateScreenshots=${updateScreenshots}</argument>
+                    <argument>-Dit.test=${it.test}</argument>
+                    <argument>clean</argument>
+                    <argument>verify</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <!-- Only the Maven process inside Docker runs browser and screenshot tests. -->
+    <profile>
+      <id>container-e2e</id>
+      <activation>
+        <property>
+          <name>docker.e2e.container</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>3.2.5</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <failIfNoTests>true</failIfNoTests>
+              <trimStackTrace>false</trimStackTrace>
+              <useFile>false</useFile>
+              <systemPropertyVariables>
+                <e2e.app.dir>${project.basedir}</e2e.app.dir>
+                <e2e.app.jar>${project.build.directory}/${project.build.finalName}.jar</e2e.app.jar>
+                <e2e.output.dir>${project.build.directory}</e2e.output.dir>
+                <visual.baseline.dir>${project.basedir}/src/test/resources/screenshots</visual.baseline.dir>
+                <visual.artifact.dir>${project.build.directory}/visual-diffs</visual.artifact.dir>
+              </systemPropertyVariables>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 </project>
