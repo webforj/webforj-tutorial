@@ -52,36 +52,42 @@ webforj-tutorial
 
 ## End-to-End and Screenshot Tests
 
-The root Maven project runs the Java Playwright suite exclusively in Docker. The container packages and starts each tutorial step separately, uses Chromium from the pinned official Playwright Java image, and stops the application after that step's tests. Applications prefer port 8080, fall back to 8090, and otherwise select a free container port.
+Each tutorial step owns its Java Playwright tests in `src/test/java/com/webforj/tutorial`, mirroring the application's Java package, and its screenshot baselines in `src/test/resources/screenshots`. Test helpers are included in each step so the step remains self-contained, with no dependency on a sibling project.
 
-Run all six tutorial steps, including screenshot comparisons:
+With Docker running, enter the step you want to test and run the normal Maven verification lifecycle:
 
 ```sh
+cd 3-routing-and-composites
 mvn verify
 ```
 
-Run an individual step in Docker:
+This builds and tests only that step. Maven launches the pinned official Playwright Java Docker image with the step directory mounted at `/app`. Inside the container, Maven performs a clean build and runs the Java Playwright tests and screenshot comparisons with Failsafe. No root POM or custom Docker image is needed.
+
+To select a test class or method within the current step:
 
 ```sh
-mvn verify -Dit.test=Step3IT
+mvn verify "-Dit.test=Step3IT#createsCustomerAndReturnsToTable"
 ```
 
-After an intentional visual change, regenerate every committed baseline in the same Docker environment:
+After an intentional visual change, regenerate this step's baselines in the same Docker environment:
 
 ```sh
 mvn verify -DupdateScreenshots=true
 ```
 
-You can also use the documentation-style explicit Docker goals. Build the image once, then run or update tests with the existing image:
+GitHub Actions runs `scripts/run-e2e.sh`, which enters each step and invokes `mvn -B -ntp verify`. It continues after a failed step and exits unsuccessfully if any step failed. You can run the same script from the repository root using Bash (Git Bash on Windows):
 
 ```sh
-mvn exec:exec@docker-e2e-build
-mvn exec:exec@docker-e2e
-mvn exec:exec@docker-e2e-single -Dtest=Step3IT
-mvn exec:exec@docker-e2e-update
+bash scripts/run-e2e.sh
 ```
 
-Screenshot baselines are stored in `e2e/src/test/resources/screenshots`. The comparator allows up to 500 anti-aliased pixels to differ in each 1440×900 capture; failure images are written to `target/visual-diffs`, Playwright traces to `target/playwright-traces`, and application logs to `target/e2e-artifacts`. The inner test profile also rejects execution unless `E2E_IN_DOCKER=true`, preventing accidental host-generated baselines.
+The workflow's optional `step` input selects one step; scheduled runs test all steps.
+
+In each step, test reports are written to `target/failsafe-reports`, failure images to `target/visual-diffs`, Playwright traces to `target/playwright-traces`, and application logs to `target/e2e-artifacts`. The screenshot comparator allows up to 500 pixels beyond its per-channel tolerance to differ.
+
+Each test starts a fresh application and browser context and stops them afterward. Applications prefer port 8080, fall back to 8090, and otherwise select a free container port. `mvn test` runs unit tests, while `mvn verify` also runs the E2E tests in Docker. Standard `-DskipITs`, `-DskipTests`, and `-Dmaven.test.skip=true` flags skip the Docker run when requested.
+
+The `container-e2e` profile binds Failsafe only for the inner Docker run, and the test setup rejects execution unless `E2E_IN_DOCKER=true` before launching Playwright. Baseline generation uses this same guard. Each step's `playwright.version` selects both the Java dependency and the Docker image tag.
 
 ## Project Highlights
 

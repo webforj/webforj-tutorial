@@ -7,10 +7,18 @@ on:
     - cron: '0 7 * * *'
   workflow_dispatch:
     inputs:
-      it_test:
-        description: 'Test filter passed to -Dit.test (e.g. Step3IT)'
-        required: false
-        default: '*IT'
+      step:
+        description: 'Tutorial step to test'
+        type: choice
+        default: all
+        options:
+          - all
+          - '1'
+          - '2'
+          - '3'
+          - '4'
+          - '5'
+          - '6'
 
 jobs:
   e2e:
@@ -30,7 +38,9 @@ jobs:
           cache: maven
 
       - name: Run end-to-end test suite
-        run: mvn -ntp -B verify -Dit.test='${{ inputs.it_test || '*IT' }}'
+        env:
+          E2E_STEP: ${{ inputs.step || 'all' }}
+        run: bash scripts/run-e2e.sh "$E2E_STEP"
 
       - name: Upload failure artifacts
         if: always()
@@ -38,8 +48,9 @@ jobs:
         with:
           name: e2e-artifacts
           path: |
-            target/visual-diffs
-            target/playwright-traces
-            target/e2e-artifacts
+            */target/failsafe-reports
+            */target/visual-diffs
+            */target/playwright-traces
+            */target/e2e-artifacts
           if-no-files-found: ignore
           retention-days: 14
