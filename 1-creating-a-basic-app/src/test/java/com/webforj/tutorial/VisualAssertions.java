@@ -57,14 +57,13 @@ final class VisualAssertions {
     byte[] screenshot = captureStable(page, name, artifactDirectory);
 
     if (Boolean.getBoolean("updateScreenshots")) {
-      requireDocker();
       Files.createDirectories(baselineDirectory);
       Files.write(baseline, screenshot);
       return;
     }
 
     if (!Files.exists(baseline)) {
-      fail("Missing Docker screenshot baseline " + baseline
+      fail("Missing screenshot baseline " + baseline
           + ". Generate it with `mvn verify -DupdateScreenshots=true`.");
     }
 
@@ -190,9 +189,4 @@ final class VisualAssertions {
     }
   }
 
-  private static void requireDocker() {
-    if (!"true".equalsIgnoreCase(System.getenv("E2E_IN_DOCKER"))) {
-      throw new IllegalStateException("Screenshot baselines may only be generated in Docker.");
-    }
-  }
 }

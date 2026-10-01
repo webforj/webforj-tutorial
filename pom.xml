@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.webforj.tutorial</groupId>
+  <artifactId>customer-app-tutorial</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <modules>
+    <module>1-creating-a-basic-app</module>
+    <module>2-working-with-data</module>
+    <module>3-routing-and-composites</module>
+    <module>4-observers-and-route-parameters</module>
+    <module>5-validating-and-binding-data</module>
+    <module>6-integrating-an-app-layout</module>
+  </modules>
+</project>

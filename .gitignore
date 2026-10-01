@@ -24,9 +24,6 @@ hs_err_pid*
 replay_pid*
 
 **/target
-node_modules/
-playwright-report/
-test-results/
 /.idea
 *.iml
 /.project

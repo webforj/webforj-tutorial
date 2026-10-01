@@ -1,6 +1,7 @@
 name: End-to-End Tests
 
 on:
+  pull_request:
   schedule:
     # 07:00 UTC = 08:00 CET (Europe/Berlin winter time). GitHub cron is UTC only,
     # so this fires at 09:00 local during CEST (summer time).
@@ -20,6 +21,9 @@ on:
           - '5'
           - '6'
 
+permissions:
+  contents: read
+
 jobs:
   e2e:
     name: Playwright suite (Docker)
@@ -37,20 +41,23 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Run end-to-end test suite
-        env:
-          E2E_STEP: ${{ inputs.step || 'all' }}
-        run: bash scripts/run-e2e.sh "$E2E_STEP"
+      - name: Verify all tutorial steps
+        if: github.event_name != 'workflow_dispatch' || inputs.step == 'all'
+        run: mvn -B -ntp -fae verify
 
-      - name: Upload failure artifacts
+      - name: Verify selected tutorial step
+        if: github.event_name == 'workflow_dispatch' && inputs.step != 'all'
+        run: mvn -B -ntp -pl :customer-app-step-${{ inputs.step }} verify
+
+      - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-artifacts
           path: |
+            */target/surefire-reports
             */target/failsafe-reports
             */target/visual-diffs
             */target/playwright-traces
-            */target/e2e-artifacts
           if-no-files-found: ignore
           retention-days: 14

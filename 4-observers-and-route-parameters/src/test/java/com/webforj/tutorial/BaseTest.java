@@ -26,30 +26,43 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.TestInstance;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 abstract class BaseTest {
-  private Playwright playwright;
-  private Browser browser;
+  private static PlaywrightServer server;
+  private static Playwright playwright;
+  private static Browser browser;
+
   private BrowserContext context;
-  private TutorialApp application;
   private final List<String> browserErrors = new ArrayList<>();
+
+  @LocalServerPort
+  private int port;
 
   protected Page page;
 
   @BeforeAll
-  void startBrowser() {
-    TutorialApp.requireDocker();
-    playwright = Playwright.create();
-    browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
+  static void startBrowser() throws IOException {
+    server = new PlaywrightServer();
+    server.start();
+    try {
+      playwright = Playwright.create();
+      browser = playwright.chromium().connect(server.wsUrl(),
+          new BrowserType.ConnectOptions().setExposeNetwork("<loopback>"));
+    } catch (RuntimeException exception) {
+      server.stop();
+      throw exception;
+    }
     PlaywrightAssertions.setDefaultAssertionTimeout(10_000);
   }
 
   @BeforeEach
-  void startApplicationAndCreateBrowserContext() throws Exception {
+  void createBrowserContext() {
     browserErrors.clear();
-    application = TutorialApp.start();
     context = browser.newContext(new Browser.NewContextOptions()
         .setViewportSize(1440, 900)
         .setDeviceScaleFactor(1)
@@ -71,34 +84,30 @@ abstract class BaseTest {
   @AfterEach
   void closeBrowserContext(TestInfo testInfo) throws IOException {
     List<String> errorsBeforeClose = List.copyOf(browserErrors);
-    try {
-      if (context != null) {
-        Path traceDirectory = Path.of(System.getProperty("e2e.output.dir"), "playwright-traces");
-        Files.createDirectories(traceDirectory);
-        String testName = (getClass().getSimpleName() + "-" + testInfo.getDisplayName())
-            .replaceAll("[^a-zA-Z0-9.-]", "-");
-        context.tracing().stop(new Tracing.StopOptions()
-            .setPath(traceDirectory.resolve(testName + ".zip")));
-        context.close();
-        context = null;
-      }
-    } finally {
-      if (application != null) {
-        application.close();
-        application = null;
-      }
+    if (context != null) {
+      Path traceDirectory = Path.of(System.getProperty("e2e.output.dir"), "playwright-traces");
+      Files.createDirectories(traceDirectory);
+      String testName = (getClass().getSimpleName() + "-" + testInfo.getDisplayName())
+          .replaceAll("[^a-zA-Z0-9.-]", "-");
+      context.tracing().stop(new Tracing.StopOptions()
+          .setPath(traceDirectory.resolve(testName + ".zip")));
+      context.close();
+      context = null;
     }
     assertTrue(errorsBeforeClose.isEmpty(),
         () -> "Browser runtime/network errors:\n" + String.join("\n", errorsBeforeClose));
   }
 
   @AfterAll
-  void stopBrowser() {
+  static void stopBrowser() {
     if (browser != null) {
       browser.close();
     }
     if (playwright != null) {
       playwright.close();
+    }
+    if (server != null) {
+      server.stop();
     }
   }
 
@@ -108,7 +117,7 @@ abstract class BaseTest {
 
   protected void openApplication(String path) {
     String normalizedPath = path.startsWith("/") ? path : "/" + path;
-    page.navigate(application.baseUrl() + normalizedPath,
+    page.navigate("http://127.0.0.1:" + port + normalizedPath,
         new Page.NavigateOptions().setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
   }
 

@@ -52,21 +52,22 @@ webforj-tutorial
 
 ## End-to-End and Screenshot Tests
 
-With Docker running, execute this command from this step's directory:
+With Docker running, run from this step's directory:
 
 ```sh
 mvn verify
+mvn verify "-Dit.test=Step1IT#rendersBasicApplicationAndOpensInformationDialog"
+mvn verify -DupdateScreenshots=true
+mvn verify -DskipITs
+mvn verify -DskipTests
+mvn verify "-Dmaven.test.skip=true"
 ```
 
-Maven launches the step's Java Playwright tests in the pinned Docker image. Only this step is built and tested. Tests are in `src/test/java/com/webforj/tutorial`, screenshot baselines in `src/test/resources/screenshots`, and reports, traces, and logs under `target`.
-
-To update this step's baselines after an intentional visual change:
+To select this step from the repository root:
 
 ```sh
-mvn verify -DupdateScreenshots=true
+mvn -B -ntp -pl :customer-app-step-1 verify
 ```
-
-Both test execution and baseline generation happen in Docker. `mvn test` runs unit tests; the end-to-end tests run during `mvn verify`.
 
 ## Project Highlights
 
