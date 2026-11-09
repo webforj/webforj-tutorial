@@ -1,7 +1,7 @@
 
 # webforJ Customer Management Tutorial App (Spring Boot)
 
-This project demonstrates how to build a customer management app using the **webforJ framework** with Spring Boot. The app showcases modern web UI development while leveraging Spring’s backend ecosystem, including dependency injection, service layers, and data management.
+This project demonstrates how to build a customer management app using **webforJ**, the full-stack Java framework, with Spring Boot. The app showcases modern web UI development while leveraging Spring’s backend ecosystem, including dependency injection, service layers, and data management.
 
 For a complete step-by-step guide to building this app, see the **[webforJ Tutorial](https://docs.webforj.com/docs/introduction/tutorial/overview)**.
 
