@@ -49,6 +49,51 @@ webforj-tutorial
 	```
 3. Open your browser and go to [http://localhost:8080](http://localhost:8080).
 
+## Testing this step with TestBed
+
+### Find components and check a dialog
+
+TestBed runs the application in a JUnit test without a browser or an HTTP server. This first example introduces the find, act, check pattern: find the Info button by its text, click it through UserInteraction, and inspect the message dialog it opens.
+
+All steps use webforJ 26.03 or later and the Spring TestBed module. Its version is managed by the webforJ BOM:
+
+```xml
+<dependency>
+  <groupId>com.webforj</groupId>
+  <artifactId>webforj-spring-testbed</artifactId>
+  <scope>test</scope>
+</dependency>
+```
+
+The runnable example combines Spring and TestBed:
+
+```java
+@SpringBootTest
+@ActiveProfiles("test")
+@WebforjTest(app = Application.class)
+class ApplicationTest {
+  // See the complete example linked below.
+}
+```
+
+```java
+var info = ComponentLocator.of(Button.class).byText("Info").locate();
+UserInteraction.click(info);
+var dialog = context.getShownOptionDialogs().getFirst();
+assertEquals("Info", dialog.getTitle());
+assertEquals("This is a tutorial!", dialog.getMessage());
+```
+
+Read the complete [ApplicationTest.java](src/test/java/com/webforj/tutorial/ApplicationTest.java) example, including its imports and assertions. Run it from this step directory:
+
+```sh
+mvn test
+```
+
+Each method gets a fresh TestBed page. The test profile disables development tools. Browser tests are still needed to check CSS, responsive layout, and browser behavior.
+
+For the underlying APIs, see [TestBed](https://docs.webforj.com/docs/testing/testbed/overview) and [Spring testing](https://docs.webforj.com/docs/integrations/spring/testing).
+
 ## Project Highlights
 
 - **Spring Boot integration:** Autowire Spring beans directly into webforJ views and components.

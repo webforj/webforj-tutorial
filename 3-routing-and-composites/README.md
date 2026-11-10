@@ -49,6 +49,41 @@ webforj-tutorial
 	```
 3. Open your browser and go to [http://localhost:8080](http://localhost:8080).
 
+## Testing this step with TestBed
+
+### Navigate and submit a form
+
+Register only MainView and FormView with routeClasses. Navigate to the table, click Add Customer, find fields by their labels, and type as a user would. Submitting checks both persistence and navigation back to the table. A second test checks that Cancel saves nothing.
+
+The runnable example combines Spring and TestBed:
+
+```java
+@SpringBootTest
+@ActiveProfiles("test")
+@WebforjTest(routeClasses = {MainView.class, FormView.class})
+@Transactional
+class CustomerNavigationTest {
+  // See the complete example linked below.
+}
+```
+
+```java
+context.navigate(MainView.class);
+UserInteraction.click(ComponentLocator.of(Button.class).byText("Add Customer").locate());
+UserInteraction.type(
+    ComponentLocator.of(TextField.class).byLabel("First Name").locate(), "Ada");
+```
+
+Read the complete [CustomerNavigationTest.java](src/test/java/com/webforj/tutorial/CustomerNavigationTest.java) example, including its imports and assertions. Run it from this step directory:
+
+```sh
+mvn test
+```
+
+Each method gets a fresh TestBed page. The test profile disables development tools. Spring keeps its context and service beans across methods; `@Transactional` rolls back each test’s database changes, keeping the seed data available for the next method. Browser tests are still needed to check CSS, responsive layout, and browser behavior.
+
+For the underlying APIs, see [TestBed](https://docs.webforj.com/docs/testing/testbed/overview) and [Spring testing](https://docs.webforj.com/docs/integrations/spring/testing).
+
 ## Project Highlights
 
 - **Spring Boot integration:** Autowire Spring beans directly into webforJ views and components.

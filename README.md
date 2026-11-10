@@ -49,6 +49,29 @@ webforj-tutorial
 	```
 3. Open your browser and go to [http://localhost:8080](http://localhost:8080).
 
+## Learning to test with TestBed
+
+The tutorial introduces [TestBed](https://docs.webforj.com/docs/testing/testbed/overview) alongside each feature. The examples run with JUnit and Spring, without a browser, server, Docker, or BBjServices. They require webforJ 26.03 or later and use the BOM-managed `webforj-spring-testbed` dependency.
+
+| Step | New testing concept |
+| --- | --- |
+| [1](1-creating-a-basic-app/README.md#testing-this-step-with-testbed) | Find components and check a dialog |
+| [2](2-working-with-data/README.md#testing-this-step-with-testbed) | Check Spring data in a component |
+| [3](3-routing-and-composites/README.md#testing-this-step-with-testbed) | Navigate and submit a form |
+| [4](4-observers-and-route-parameters/README.md#testing-this-step-with-testbed) | Exercise route parameters and observers |
+| [5](5-validating-and-binding-data/README.md#testing-this-step-with-testbed) | Check validation and data binding |
+| [6](6-integrating-an-app-layout/README.md#testing-this-step-with-testbed) | Test the complete app and its layout |
+
+Enter any step directory and run:
+
+```sh
+mvn test
+```
+
+Each step contains a complete test under `src/test/java/com/webforj/tutorial` and explains its new concepts in its README. Tests find components through visible text or labels and act through `UserInteraction`. Assertions run immediately after the gesture. Each method starts with a fresh TestBed page; tests that change the database roll back their transaction. Spring’s application context remains cached.
+
+TestBed checks application behavior. Use browser tests for appearance, responsive layouts, and client behavior. See [Spring testing](https://docs.webforj.com/docs/integrations/spring/testing) for the integration lifecycle.
+
 ## Project Highlights
 
 - **Spring Boot integration:** Autowire Spring beans directly into webforJ views and components.

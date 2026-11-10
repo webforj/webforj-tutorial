@@ -49,6 +49,41 @@ webforj-tutorial
 	```
 3. Open your browser and go to [http://localhost:8080](http://localhost:8080).
 
+## Testing this step with TestBed
+
+### Check Spring data in a component
+
+Build on the first step by checking a component populated by a Spring service. The application receives its real CustomerService and seeded H2 data. The test locates the table and checks that its item count matches the service.
+
+The runnable example combines Spring and TestBed:
+
+```java
+@SpringBootTest
+@ActiveProfiles("test")
+@WebforjTest(app = Application.class)
+@Transactional
+class ApplicationTest {
+  // See the complete example linked below.
+}
+```
+
+```java
+var table = ComponentLocator.of(Table.class).locate();
+assertTrue(customers.getTotalCustomersCount() > 0);
+verifyThat(table).isAttached()
+    .hasItemCount((int) customers.getTotalCustomersCount());
+```
+
+Read the complete [ApplicationTest.java](src/test/java/com/webforj/tutorial/ApplicationTest.java) example, including its imports and assertions. Run it from this step directory:
+
+```sh
+mvn test
+```
+
+Each method gets a fresh TestBed page. The test profile disables development tools. Spring keeps its context and service beans across methods; `@Transactional` rolls back each test’s database changes, keeping the seed data available for the next method. Browser tests are still needed to check CSS, responsive layout, and browser behavior.
+
+For the underlying APIs, see [TestBed](https://docs.webforj.com/docs/testing/testbed/overview) and [Spring testing](https://docs.webforj.com/docs/integrations/spring/testing).
+
 ## Project Highlights
 
 - **Spring Boot integration:** Autowire Spring beans directly into webforJ views and components.
