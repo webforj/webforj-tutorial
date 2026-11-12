@@ -60,3 +60,11 @@ webforj-tutorial
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for details.
+
+## Layout styling
+
+The application shell uses `src/main/frontend/app.css`, copied verbatim from
+`com.webforj:webforj-archetype-sidemenu:26.03`. Keep its drawer width, header height,
+surfaces, and drawer-header divider aligned with that archetype. The drawer title
+uses the same heading, subtitle typography, and zero-margin spacing.
+`css/card.css` supplies the tutorial-specific customer form styling.

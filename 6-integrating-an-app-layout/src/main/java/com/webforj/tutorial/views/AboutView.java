@@ -14,8 +14,8 @@ import com.webforj.router.annotation.Route;
 @Route(outlet = MainLayout.class)
 @FrameTitle("About")
 public class AboutView extends Composite<FlexLayout> {
-  private FlexLayout self = getBoundComponent();
-  private Img fileImg = new Img("ws://images/Files.svg");
+  private final FlexLayout self = getBoundComponent();
+  private final Img fileImg = new Img("ws://images/Files.svg");
 
   public AboutView() {
     fileImg.setWidth(250);
