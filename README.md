@@ -14,6 +14,7 @@ To run the app, ensure the following tools are installed:
 - Java 21 or higher
 - BBj 26.02 when running with local BBjServices
 - Maven
+- Docker Desktop (or another Docker engine) for end-to-end tests
 - A Java IDE (e.g., IntelliJ IDEA, Eclipse, VSCode)
 - Web browser
 - Git (recommended)
@@ -27,6 +28,7 @@ webforj-tutorial
 │   .gitignore
 │   LICENSE
 │   README.md
+│   pom.xml
 │   tree.txt
 │
 ├───1-creating-a-basic-app
@@ -48,6 +50,26 @@ webforj-tutorial
 	mvn
 	```
 3. Open your browser and go to [http://localhost:8080](http://localhost:8080).
+
+## End-to-End and Screenshot Tests
+
+Docker must be running. From the repository root:
+
+```sh
+mvn -B -ntp -fae verify
+mvn -B -ntp -pl :customer-app-step-3 verify
+```
+
+From `3-routing-and-composites` (or use the matching class in another step):
+
+```sh
+mvn verify
+mvn verify "-Dit.test=Step3IT#createsCustomerAndReturnsToTable"
+mvn verify -DupdateScreenshots=true
+mvn verify -DskipITs
+mvn verify -DskipTests
+mvn verify "-Dmaven.test.skip=true"
+```
 
 ## Project Highlights
 
