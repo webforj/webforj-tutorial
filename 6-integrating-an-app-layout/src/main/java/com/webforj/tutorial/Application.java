@@ -9,6 +9,7 @@ import com.webforj.annotation.Routify;
 import com.webforj.bundle.annotation.BundleEntry;
 
 @SpringBootApplication
+@BundleEntry("app.css")
 @BundleEntry("css/card.css")
 @AppTheme("system")
 @Routify(packages = "com.webforj.tutorial.views")

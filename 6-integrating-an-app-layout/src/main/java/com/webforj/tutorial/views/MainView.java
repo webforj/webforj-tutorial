@@ -20,9 +20,9 @@ import com.webforj.router.annotation.FrameTitle;
 @FrameTitle("Customer Table")
 public class MainView extends Composite<FlexLayout> {
   private final CustomerService customerService;
-  private FlexLayout self = getBoundComponent();
-  private Table<Customer> table = new Table<>();
-  private Button addCustomer = new Button("Add Customer", ButtonTheme.PRIMARY,
+  private final FlexLayout self = getBoundComponent();
+  private final Table<Customer> table = new Table<>();
+  private final Button addCustomer = new Button("Add Customer", ButtonTheme.PRIMARY,
       e -> Router.getCurrent().navigate(FormView.class));
 
   public MainView(CustomerService customerService) {

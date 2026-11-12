@@ -15,7 +15,6 @@ import com.webforj.component.list.ListItem;
 import com.webforj.data.binding.BindingContext;
 import com.webforj.data.validation.server.ValidationResult;
 import com.webforj.tutorial.entity.Customer;
-import com.webforj.tutorial.entity.Customer.Country;
 import com.webforj.tutorial.layouts.MainLayout;
 import com.webforj.tutorial.service.CustomerService;
 import com.webforj.router.Router;
@@ -66,7 +65,7 @@ public class FormView extends Composite<Div> implements WillEnterObserver {
 
   private void fillCountries() {
     ArrayList<ListItem> listCountries = new ArrayList<>();
-    for (Country countryItem : Customer.Country.values()) {
+    for (Customer.Country countryItem : Customer.Country.values()) {
       listCountries.add(new ListItem(countryItem, countryItem.toString()));
     }
     country.insert(listCountries);

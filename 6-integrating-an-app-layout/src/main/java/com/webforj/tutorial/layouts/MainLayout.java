@@ -21,11 +21,9 @@ import com.webforj.dispatcher.ListenerRegistration;
 
 @Route
 public class MainLayout extends Composite<AppLayout> {
-  private AppLayout self = getBoundComponent();
-  private H1 title = new H1("");
-  private ListenerRegistration<NavigateEvent> navigateRegistration;
-  private Toolbar toolbar = new Toolbar();
-  private AppNav appNav = new AppNav();
+  private final AppLayout self = getBoundComponent();
+  private final H1 title = new H1("");
+  private final ListenerRegistration<NavigateEvent> navigateRegistration;
 
   public MainLayout() {
     setHeader();
@@ -34,9 +32,10 @@ public class MainLayout extends Composite<AppLayout> {
   }
 
   private void setHeader() {
+    Toolbar toolbar = new Toolbar();
     self.addToHeader(toolbar);
 
-    toolbar.addToStart(new AppDrawerToggle());
+    toolbar.addToStart(new AppDrawerToggle(TablerIcon.create("layout-sidebar")));
     toolbar.addToTitle(title);
   }
 
@@ -44,8 +43,9 @@ public class MainLayout extends Composite<AppLayout> {
     self.setDrawerHeaderVisible(true)
         .addToDrawerTitle(new AppTitle(true));
 
+    AppNav appNav = new AppNav();
     appNav.addItem(new AppNavItem("Dashboard", MainView.class,
-        TablerIcon.create("archive")));
+        TablerIcon.create("layout-dashboard")));
     appNav.addItem(new AppNavItem("About", AboutView.class,
         TablerIcon.create("info-circle")));
     self.addToDrawer(appNav);
